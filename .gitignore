@@ -189,3 +189,6 @@ cython_debug/
 
 .scratch/
 .scratch
+*.db
+*.json
+test_insert.py

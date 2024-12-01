@@ -17,8 +17,8 @@ class AddUserHandler:
 
     def run(self):
         self.validate_username()
-        self.check_db()
-        sys.exit(0)
+        # self.check_db()
+        # sys.exit(0)
         print(f"fetching user data")
         self.fetch_user_archives()
         
