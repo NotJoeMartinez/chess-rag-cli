@@ -1,18 +1,18 @@
 [project]
-name = "click-example-complex"
+name = "chess-rag-cli"
 version = "1.0.0"
-description = "Click complex example"
+description = "Testing RAG on chess.com PGN data"
 requires-python = ">=3.8"
 dependencies = [
     "click>=8.1",
 ]
 
 [project.scripts]
-complex = "complex.cli:cli"
+chess-rag = "chess_rag.cli:cli"
 
 [build-system]
 requires = ["flit_core<4"]
 build-backend = "flit_core.buildapi"
 
 [tool.flit.module]
-name = "complex"
+name = "chess_rag"

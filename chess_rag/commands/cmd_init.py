@@ -1,4 +1,4 @@
-from complex.cli import pass_environment
+from chess_rag.cli import pass_environment
 
 import click
 
