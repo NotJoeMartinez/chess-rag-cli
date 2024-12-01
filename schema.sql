@@ -8,7 +8,9 @@ CREATE TABLE IF NOT EXISTS games (
     pgn TEXT,
     time_control TEXT,
     end_time TEXT, -- convert to YYYY-MM-DD HH:MM:SS
-    rated INTEGER,
+    rated TEXT,
+    accuracies_white REAL,
+    accuracies_black REAL,
     tcn TEXT,
     uuid TEXT,
     initial_setup TEXT,

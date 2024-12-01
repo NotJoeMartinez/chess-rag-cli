@@ -1,6 +1,6 @@
 import json
+import datetime
 import sqlite3
-
 
 from pprint import pprint
 
@@ -29,6 +29,15 @@ def get_game_archive():
     print('Inserting games into database...')
     with sqlite3.connect('test.db') as conn:
         for game in extracted_games:
+
+            # handle missing keys 'accuracies'
+            if 'accuracies' not in game:
+                accuracies_white = None
+                accuracies_black = None
+            else:
+                accuracies_white = game['accuracies']['white']
+                accuracies_black = game['accuracies']['black']
+
             curr = conn.cursor()
             curr.execute(
                 '''
@@ -38,6 +47,8 @@ def get_game_archive():
                     time_control,
                     end_time,
                     rated,
+                    accuracies_white,
+                    accuracies_black,
                     tcn,
                     uuid,
                     initial_setup,
@@ -59,6 +70,8 @@ def get_game_archive():
                     :time_control,
                     :end_time,
                     :rated,
+                    :accuracies_white,
+                    :accuracies_black,
                     :tcn,
                     :uuid,
                     :initial_setup,
@@ -80,8 +93,10 @@ def get_game_archive():
                     'url': game['url'],
                     'pgn': game['pgn'],
                     'time_control': game['time_control'],
-                    'end_time': game['end_time'],
+                    'end_time': unix_epoch_to_datetime(game['end_time']),
                     'rated': game['rated'],
+                    'accuracies_white': accuracies_white, 
+                    'accuracies_black': accuracies_black, 
                     'tcn': game['tcn'],
                     'uuid': game['uuid'],
                     'initial_setup': game['initial_setup'],
@@ -102,6 +117,9 @@ def get_game_archive():
             conn.commit()
 
 
+# YYYY-MM-DD HH:MM:SS
+def unix_epoch_to_datetime(unix_epoch):
+    return datetime.datetime.fromtimestamp(unix_epoch)
 
 if __name__ == '__main__':
     main()
