@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS games (
     uuid TEXT,
     initial_setup TEXT,
     fen TEXT,
-    start_time TEXT, -- convert to YYYY-MM-DD HH:MM:SS
+    -- start_time TEXT, -- convert to YYYY-MM-DD HH:MM:SS
     time_class TEXT,
     rules TEXT,
     white_rating INTEGER,

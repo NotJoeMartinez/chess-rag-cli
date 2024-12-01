@@ -191,4 +191,3 @@ cython_debug/
 .scratch
 *.db
 *.json
-test_insert.py
