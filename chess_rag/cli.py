@@ -4,7 +4,7 @@ import click
 @click.group()
 def cli():
     """
-    checkmate
+    Checkmate
     """
     pass
 
