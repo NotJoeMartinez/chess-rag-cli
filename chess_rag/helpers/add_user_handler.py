@@ -70,14 +70,25 @@ class AddUserHandler:
         # check the database for the user
         # if the user exists update the archive with any new data
         # get or init db
+        db_path = self.get_db_path()
+        self.init_db(db_path)
 
-        config_path = self.get_config_path()
-        print(f"config_path: {config_path}")
+        with sqlite3.connect(db_path) as conn:
+            curr = conn.cursor()
+
+            curr.execute(
+                '''
+                SELECT * FROM users WHERE username = ?
+                ''',
+                (self.username,)
+            )
+
+            user = curr.fetchone()
+
+            
 
         
-    
-
-    def get_config_path(self):
+    def get_db_path(self):
         platform = sys.platform
 
         try:
@@ -92,38 +103,49 @@ class AddUserHandler:
             if not os.path.exists(config_path):
                 os.makedirs(config_path) 
 
-            return config_path
+            return os.path.join(config_path, 'game-data.db')
 
         except Exception as e:
             print(f"Error: Failed to configure db: {e}")
             sys.exit(1)
     
     
-    def init_db(self, config_path):
-        # users:
-        #   username TEXT, -- unique
-        #   last_updated TEXT,
-        # games:
-        #   url TEXT,
-        #   pgn TEXT,
-        #   time_control TEXT,
-        #   end_time TEXT, -- convert to YYYY-MM-DD HH:MM:SS
-        #   rated INTEGER,
-        #   tcn TEXT,
-        #   uuid TEXT,
-        #   initial_setup TEXT,
-        #   fen TEXT,
-        #   start_time TEXT, -- convert to YYYY-MM-DD HH:MM:SS
-        #   time_class TEXT,
-        #   rules TEXT,
-        #   white_rating INTEGER,
-        #   white_result TEXT,
-        #   white_username TEXT,
-        #   white_uuid TEXT,
-        #   black_rating INTEGER,
-        #   black_result TEXT,
-        #   black_username TEXT,
-        #   black_uuid TEXT,
-        #   eco TEXT -- opening url
-    
-        database_path = os.path.join(config_path, 'game-data.db')
+    def init_db(self, db_path):
+        with sqlite3.connect(db_path) as conn:
+            curr = conn.cursor()
+
+            curr.execute(
+                '''
+                CREATE TABLE IF NOT EXISTS users (
+                    username TEXT UNIQUE, 
+                    last_updated TEXT
+                    );
+
+                CREATE TABLE IF NOT EXISTS games (
+                    url TEXT UNIQUE,
+                    pgn TEXT,
+                    time_control TEXT,
+                    end_time TEXT,
+                    rated TEXT,
+                    accuracies_white REAL,
+                    accuracies_black REAL,
+                    tcn TEXT,
+                    uuid TEXT,
+                    initial_setup TEXT,
+                    fen TEXT,
+                    time_class TEXT,
+                    rules TEXT,
+                    white_rating INTEGER,
+                    white_result TEXT,
+                    white_username TEXT,
+                    white_uuid TEXT,
+                    black_rating INTEGER,
+                    black_result TEXT,
+                    black_username TEXT,
+                    black_uuid TEXT,
+                    eco TEXT 
+                );
+                '''
+            )
+
+            conn.commit()

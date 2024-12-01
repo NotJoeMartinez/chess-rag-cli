@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS games (
     url TEXT UNIQUE,
     pgn TEXT,
     time_control TEXT,
-    end_time TEXT, -- convert to YYYY-MM-DD HH:MM:SS
+    end_time TEXT,
     rated TEXT,
     accuracies_white REAL,
     accuracies_black REAL,
@@ -15,7 +15,6 @@ CREATE TABLE IF NOT EXISTS games (
     uuid TEXT,
     initial_setup TEXT,
     fen TEXT,
-    -- start_time TEXT, -- convert to YYYY-MM-DD HH:MM:SS
     time_class TEXT,
     rules TEXT,
     white_rating INTEGER,
@@ -26,5 +25,5 @@ CREATE TABLE IF NOT EXISTS games (
     black_result TEXT,
     black_username TEXT,
     black_uuid TEXT,
-    eco TEXT -- opening url
+    eco TEXT 
 );
