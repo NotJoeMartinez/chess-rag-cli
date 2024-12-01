@@ -66,56 +66,64 @@ class AddUserHandler:
 
 
     def check_db(self):
-        self.get_or_init_db()
+
         # check the database for the user
         # if the user exists update the archive with any new data
-
         # get or init db
-        pass
 
-    def get_or_init_db(self): 
         config_path = self.get_config_path()
         print(f"config_path: {config_path}")
+
+        
     
 
     def get_config_path(self):
         platform = sys.platform
 
-        if platform == 'win32':
-            config_path = os.path.join(os.getenv('APPDATA'), 'chess-rag')
-            if not os.path.exists(config_path):
-                return self.make_config_dir() 
-            else:
-                return config_path 
-
-        elif platform == 'darwin' or platform == 'linux':
-            config_path = os.path.join(os.getenv('HOME'), '.config', 'chess-rag')
-            if not os.path.exists(config_path):
-                return self.make_config_dir()
-            else:
-                return config_path
-
-        else:
-            print("Error: Failed to configure db:")
-            sys.exit(1)
-
-
-    def make_config_dir(self):
-        platform = sys.platform
         try:
             if platform == 'win32':
                 config_path = os.path.join(os.getenv('APPDATA'), 'chess-rag')
-                # check if config dir exists
-                if not os.path.exists(config_path):
-                    os.mkdir(config_path)
-                    return config_path
-            
-            if platform == 'darwin' or platform == 'linux':
+            elif platform == 'darwin' or platform == 'linux':
                 config_path = os.path.join(os.getenv('HOME'), '.config', 'chess-rag')
-                # check if config dir exists
-                if not os.path.exists(config_path):
-                    os.mkdir(config_path)
-                    return config_path
+            else:
+                print("Error: Unsupported platform")
+                sys.exit(1)
+
+            if not os.path.exists(config_path):
+                os.makedirs(config_path) 
+
+            return config_path
+
         except Exception as e:
-            print(e)
+            print(f"Error: Failed to configure db: {e}")
             sys.exit(1)
+    
+    
+    def init_db(self, config_path):
+        # users:
+        #   username TEXT, -- unique
+        #   last_updated TEXT,
+        # games:
+        #   url TEXT,
+        #   pgn TEXT,
+        #   time_control TEXT,
+        #   end_time TEXT, -- convert to YYYY-MM-DD HH:MM:SS
+        #   rated INTEGER,
+        #   tcn TEXT,
+        #   uuid TEXT,
+        #   initial_setup TEXT,
+        #   fen TEXT,
+        #   start_time TEXT, -- convert to YYYY-MM-DD HH:MM:SS
+        #   time_class TEXT,
+        #   rules TEXT,
+        #   white_rating INTEGER,
+        #   white_result TEXT,
+        #   white_username TEXT,
+        #   white_uuid TEXT,
+        #   black_rating INTEGER,
+        #   black_result TEXT,
+        #   black_username TEXT,
+        #   black_uuid TEXT,
+        #   eco TEXT -- opening url
+    
+        database_path = os.path.join(config_path, 'game-data.db')
