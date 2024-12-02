@@ -24,7 +24,9 @@ def main():
             print("Usage: python vec_chess.py search <query>")
             sys.exit(1)
         query = sys.argv[2]
-        search(query)
+        vec_games = search_db(query)
+        start_llm(vec_games, query)
+
     else:
         print("Usage: python vec_chess.py init|search")
         sys.exit(1)
@@ -37,9 +39,6 @@ def init():
     print("Adding embeddings")
     add_embeddings()
 
-
-def search(query):
-    search_db(query)
 
 def init_db():
     # init db
@@ -150,8 +149,51 @@ def search_db(query):
             [serialize(query_embedding)],
         ).fetchall()
 
-        for row in results:
-            print(row)
+        return results
+
+
+def start_llm(vec_games, query):
+
+    context = ''
+    for row in vec_games:
+        pgn = row[2]
+        context += f"PGN:\n{pgn}\n\n"
+
+    user_str = f"Context: {context}\n\n---\n\nQuestion: {query}\nAnswer:"
+    system_prompt = """
+                    Answer the chess related question based on PGN data below
+                    """
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_str},
+    ]
+
+    completion = get_completion(messages)
+    print(completion)
+
+
+
+def get_completion(messages: list) -> str:
+
+    client = OpenAI()
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=messages,
+            temperature=0.5,
+            max_tokens=2000,
+            top_p=1,
+            frequency_penalty=0,
+            presence_penalty=0,
+            stop=None,
+        )
+        return response.choices[0].message.content
+
+    except Exception as e:
+        print(e)
+        sys.exit(1)
+
+
 
 
 def serialize(vector: List[float]) -> bytes:
