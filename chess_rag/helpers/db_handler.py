@@ -2,6 +2,7 @@ import os
 import datetime
 import sys
 import sqlite3
+import sqlite_vec
 
 class DBHandler:
     def __init__(self) -> None:
@@ -11,6 +12,12 @@ class DBHandler:
         db_path = self.get_db_path()
         with sqlite3.connect(db_path) as conn:
             curr = conn.cursor()
+
+            conn.enable_load_extension(True)
+            sqlite_vec.load(conn)
+            # vec_version, = conn.execute("select vec_version()").fetchone()
+            # print(f"vec_version={vec_version}")
+
 
             curr.execute(
                 '''
