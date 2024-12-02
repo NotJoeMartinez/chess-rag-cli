@@ -3,9 +3,13 @@ import re
 import json
 import sqlite3
 import os
-from pprint import pprint
 import datetime
 import requests
+
+
+from pprint import pprint
+
+from chess_rag.helpers.db_handler import DBHandler
 
 class AddUserHandler:
     def __init__(self, username):
@@ -16,8 +20,12 @@ class AddUserHandler:
 
 
     def run(self):
+
         self.validate_username()
-        self.check_db()
+        db = DBHandler()
+        db.init_db()
+        print("Checking database for user...")
+        db.add_or_update_user(self.username)
         print(f"fetching user data")
         self.fetch_user_archives()
         print(f"Added {self.username} to the database")
@@ -55,18 +63,10 @@ class AddUserHandler:
             res = requests.get(url=url, headers=self.headers).json()
             games_dict[year].append({month:res})
 
-        self.get_game_archive(games_dict)
-        # now = datetime.datetime.now()
-        # today = now.strftime("%Y-%m-%d")
-        # fname = f"{self.username}_chess_com_{today}.json"
-        
-        # with open(fname, "w") as f:
-        #     json.dump(games_dict,f)
-
-        # print(f"Saved data from {self.username} to {fname}")
+        self.insert_archives(games_dict)
 
 
-    def get_game_archive(self, data):
+    def insert_archives(self, data):
         
         extracted_games = []
 
@@ -81,7 +81,9 @@ class AddUserHandler:
 
 
         print('Inserting games into database...')
-        db_path = self.get_db_path()
+
+        db_path = DBHandler().get_db_path() 
+
         with sqlite3.connect(db_path) as conn:
             for game in extracted_games:
 
@@ -175,110 +177,3 @@ class AddUserHandler:
     # YYYY-MM-DD HH:MM:SS
     def unix_epoch_to_datetime(self, unix_epoch):
         return datetime.datetime.fromtimestamp(unix_epoch)
-
-    def check_db(self):
-
-        # check the database for the user
-        # if the user exists update the archive with any new data
-        # get or init db
-        db_path = self.get_db_path()
-        self.init_db(db_path)
-
-        with sqlite3.connect(db_path) as conn:
-            curr = conn.cursor()
-
-            curr.execute(
-                '''
-                SELECT * FROM users WHERE username = ?
-                ''',
-                (self.username,)
-            )
-
-            user = curr.fetchone()
-
-            if user is None:
-                curr.execute(
-                    '''
-                    INSERT INTO users (username, last_updated) VALUES (?, ?)
-                    ''',
-                    (self.username, datetime.datetime.now())
-                )
-
-                conn.commit()   
-                print(f"Added {self.username} to the database")
-            else:
-                curr.execute(
-                    '''
-                    UPDATE users SET last_updated = ? WHERE username = ?
-                    ''',
-                    (datetime.datetime.now(), self.username)
-                )
-                print(f"Updating {self.username}")
-        
-    def get_db_path(self):
-        platform = sys.platform
-
-        try:
-            if platform == 'win32':
-                config_path = os.path.join(os.getenv('APPDATA'), 'chess-rag')
-            elif platform == 'darwin' or platform == 'linux':
-                config_path = os.path.join(os.getenv('HOME'), '.config', 'chess-rag')
-            else:
-                print("Error: Unsupported platform")
-                sys.exit(1)
-
-            if not os.path.exists(config_path):
-                os.makedirs(config_path) 
-
-            return os.path.join(config_path, 'game-data.db')
-
-        except Exception as e:
-            print(f"Error: Failed to configure db: {e}")
-            sys.exit(1)
-    
-    
-    def init_db(self, db_path):
-        with sqlite3.connect(db_path) as conn:
-            curr = conn.cursor()
-
-            curr.execute(
-                '''
-                CREATE TABLE IF NOT EXISTS users (
-                    username TEXT UNIQUE, 
-                    last_updated TEXT
-                    )
-
-
-                '''
-            )
-
-            curr.execute(
-                '''
-                CREATE TABLE IF NOT EXISTS games (
-                    url TEXT UNIQUE,
-                    pgn TEXT,
-                    time_control TEXT,
-                    end_time TEXT,
-                    rated TEXT,
-                    accuracies_white REAL,
-                    accuracies_black REAL,
-                    tcn TEXT,
-                    uuid TEXT,
-                    initial_setup TEXT,
-                    fen TEXT,
-                    time_class TEXT,
-                    rules TEXT,
-                    white_rating INTEGER,
-                    white_result TEXT,
-                    white_username TEXT,
-                    white_uuid TEXT,
-                    black_rating INTEGER,
-                    black_result TEXT,
-                    black_username TEXT,
-                    black_uuid TEXT,
-                    eco TEXT 
-                )
-                '''
-            )
-
-            conn.commit()
