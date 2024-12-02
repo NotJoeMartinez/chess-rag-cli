@@ -10,12 +10,10 @@ DEV_HEADERS = {
     'User-Agent': 'chess-rag-cli (https://github.com/NotJoeMartinez/chess-rag-cli)'
 }
 
-DB_PATH = 'test_chess_vec.db' 
 
-def add_or_update_user(username):
+def add_or_update_user(username, db_path):
 
-
-    with sqlite3.connect(DB_PATH) as conn:
+    with sqlite3.connect(db_path) as conn:
         curr = conn.cursor()
 
         curr.execute(
@@ -47,7 +45,7 @@ def add_or_update_user(username):
             print(f"Updating {username}")
 
 
-def fetch_user_archives(username):
+def fetch_user_archives(username, db_path):
     archive_url = f"https://api.chess.com/pub/player/{username}/games/archives"
     r = requests.get(url=archive_url, headers=DEV_HEADERS)
     month_urls = r.json()
@@ -68,10 +66,10 @@ def fetch_user_archives(username):
         res = requests.get(url=url, headers=DEV_HEADERS).json()
         games_dict[year].append({month:res})
 
-    insert_archives(games_dict)
+    insert_archives(games_dict, db_path)
 
 
-def insert_archives(data):
+def insert_archives(data, db_path):
     
     extracted_games = []
 
@@ -88,7 +86,7 @@ def insert_archives(data):
     print('Inserting games into database...')
 
 
-    with sqlite3.connect(DB_PATH) as conn:
+    with sqlite3.connect(db_path) as conn:
         for game in extracted_games:
 
             # handle missing keys 'accuracies'
