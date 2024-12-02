@@ -172,7 +172,6 @@ def start_llm(vec_games, query):
     print(completion)
 
 
-
 def get_completion(messages: list) -> str:
 
     client = OpenAI()
@@ -192,8 +191,6 @@ def get_completion(messages: list) -> str:
     except Exception as e:
         print(e)
         sys.exit(1)
-
-
 
 
 def serialize(vector: List[float]) -> bytes:
