@@ -5,7 +5,7 @@ import sqlite3
 
 class DBHandler:
     def __init__(self) -> None:
-        pass
+        self.init_db()
 
     def init_db(self):
         db_path = self.get_db_path()
@@ -109,3 +109,17 @@ class DBHandler:
                     (datetime.datetime.now(), username)
                 )
                 print(f"Updating {username}")
+    
+
+    def get_users(self):
+
+        db_path = self.get_db_path()
+        with sqlite3.connect(db_path) as conn:
+            curr = conn.cursor()
+            curr.execute(
+                '''
+                SELECT * FROM users
+                '''
+            )
+
+            return curr.fetchall()
