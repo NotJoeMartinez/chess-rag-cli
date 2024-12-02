@@ -17,10 +17,9 @@ class AddUserHandler:
 
     def run(self):
         self.validate_username()
-        # self.check_db()
-        # sys.exit(0)
+        self.check_db()
         print(f"fetching user data")
-        self.fetch_user_archives()
+        # self.fetch_user_archives()
         
 
     def validate_username(self):
@@ -85,8 +84,24 @@ class AddUserHandler:
 
             user = curr.fetchone()
 
-            
+            if user is None:
+                curr.execute(
+                    '''
+                    INSERT INTO users (username, last_updated) VALUES (?, ?)
+                    ''',
+                    (self.username, datetime.datetime.now())
+                )
 
+                conn.commit()   
+                print(f"Added {self.username} to the database")
+            else:
+                curr.execute(
+                    '''
+                    UPDATE users SET last_updated = ? WHERE username = ?
+                    ''',
+                    (datetime.datetime.now(), self.username)
+                )
+                print(f"Updating {self.username}")
         
     def get_db_path(self):
         platform = sys.platform
@@ -119,8 +134,14 @@ class AddUserHandler:
                 CREATE TABLE IF NOT EXISTS users (
                     username TEXT UNIQUE, 
                     last_updated TEXT
-                    );
+                    )
 
+
+                '''
+            )
+
+            curr.execute(
+                '''
                 CREATE TABLE IF NOT EXISTS games (
                     url TEXT UNIQUE,
                     pgn TEXT,
@@ -144,7 +165,7 @@ class AddUserHandler:
                     black_username TEXT,
                     black_uuid TEXT,
                     eco TEXT 
-                );
+                )
                 '''
             )
 

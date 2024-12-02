@@ -1,0 +1,5 @@
+- [ ] Handle new user creation
+    - if user exists in database, update user's data
+    - if user does not exist in database, create new user
+- [ ] Implement list command
+- [ ] Integrate sqlite-vec
