@@ -49,12 +49,16 @@ class AddUserHandler:
 
         games_dict = {}
 
+        len_archives = len(month_urls["archives"])
+        count = 0
+
         for url in month_urls["archives"]:
             res = requests.get(url=url, headers=self.headers).json()
             match = re.search(r"games\/(\d{4})\/(\d{2})$",url)
             year = match.group(1)
             month = match.group(2)
             games_dict[year] = []
+            print(f"Fetching games for {year}-{month} ({count}/{len_archives})")
 
         for url in month_urls["archives"]:
             match = re.search(r"games\/(\d{4})\/(\d{2})$",url)
